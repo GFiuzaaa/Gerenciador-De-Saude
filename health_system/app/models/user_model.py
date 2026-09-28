@@ -1,36 +1,49 @@
+import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 
 class UserModel:
-    # Lista simulada contendo apenas usuários comuns
-    _tabela_usuarios_mock = [
-        {
-            "id": 1,
-            "email": "joao@teste.com",
-            "nome": "João Silva",
-            "senha_hash": generate_password_hash("123456")
-        },
-        {
-            "id": 2,
-            "email": "maria@teste.com",
-            "nome": "Maria Souza",
-            "senha_hash": generate_password_hash("senha123")
-        }
-    ]
-
-    def __init__(self, id, email, nome, senha_hash):
+    def __init__(self, id, nome, email, senha_hash):
         self.id = id
-        self.email = email
         self.nome = nome
+        self.email = email
         self.senha_hash = senha_hash
 
     @classmethod
-    def query_filter_by_email(cls, email):
-        """Busca o usuário simulando o SQLAlchemy."""
-        for u in cls._tabela_usuarios_mock:
-            if u["email"] == email:
-                return cls(u["id"], u["email"], u["nome"], u["senha_hash"])
+    def query_filter_by_email(cls, email: str):
+        conn = sqlite3.connect('saude.db')
+        cursor = conn.cursor()
+
+        query = f"SELECT id, nome, email, senha_hash FROM usuarios WHERE email = '{email}'"
+        cursor.execute(query)
+        resultado = cursor.fetchone()
+        conn.close()
+
+        if resultado:
+            return cls(
+                id=resultado[0],
+                nome=resultado[1],
+                email=resultado[2],
+                senha_hash=resultado[3]
+            )
         return None
 
-    def verificar_senha(self, senha):
-        """Verifica se a senha confere."""
+    @classmethod
+    def criar_usuario(cls, nome: str, email: str, senha: str):
+        """Insere um novo utilizador na base de dados usando o cursor."""
+        conn = sqlite3.connect('saude.db')
+        cursor = conn.cursor()
+
+        # Gera o hash seguro da palavra-passe antes de salvar
+        senha_hash = generate_password_hash(senha)
+
+        # Executa a inserção parametrizada
+        cursor.execute("""
+            INSERT INTO usuarios (nome, email, senha_hash)
+            VALUES (?, ?, ?);
+        """, (nome, email, senha_hash))
+
+        conn.commit()
+        conn.close()
+
+    def verificar_senha(self, senha: str) -> bool:
         return check_password_hash(self.senha_hash, senha)

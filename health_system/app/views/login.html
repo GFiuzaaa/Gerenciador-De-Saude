@@ -2,7 +2,6 @@
 {% block content %}
 <h2>Entrar no Sistema</h2>
 
-<!-- Substituído 'with' por 'set' para evitar conflitos de tags no Jinja2 -->
 {% set messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}
   {% for category, message in messages %}
@@ -21,8 +20,6 @@
 </form>
 
 <div class="login-hints">
-    <strong>Credenciais para teste:</strong><br>
-    Usuário 1: <code>joao@teste.com</code> / <code>123456</code><br>
-    Usuário 2: <code>maria@teste.com</code> / <code>senha123</code>
+    Não tem uma conta? <a href="{{ url_for('auth.cadastro') }}" style="color: var(--primary); font-weight: bold;">Cadastre-se aqui</a>.
 </div>
 {% endblock %}

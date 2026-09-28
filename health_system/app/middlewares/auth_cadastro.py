@@ -5,7 +5,7 @@ def registrar_middlewares(app):
     
     @app.before_request
     def verificar_autenticacao():
-        # Liberada a rota 'auth.cadastro' para utilizadores não autenticados
+        # Liberada a rota 'auth.cadastro'
         rotas_livres = ['auth.login', 'auth.cadastro', 'static']
         
         if request.endpoint and request.endpoint not in rotas_livres:
